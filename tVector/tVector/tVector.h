@@ -65,7 +65,8 @@ bool tVector<T>::iterator::operator !=(iterator rhs)
 template<typename T>
 T& tVector<T>::iterator::operator*() const
 {
-	return &vector[];
+	//return &vector();
+	//fix
 }
 
 template <typename T>

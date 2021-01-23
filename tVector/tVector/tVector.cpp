@@ -8,6 +8,10 @@
 int main()
 {
 	tVector<int> numbers;
+	numbers.push_back(1);
+	numbers.push_back(4);
+	numbers.push_back(8);
+
 	numbers.~tVector();
 	for (auto it = numbers.begin(); it != numbers.end(); ++it)
 	{
