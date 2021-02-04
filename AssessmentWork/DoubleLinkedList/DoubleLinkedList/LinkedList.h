@@ -18,11 +18,13 @@ public:
 	 tList(const tList &other); //copy constructor 
 	 ~tList(); // deconstructs the list
 
-	 void pop_front(const T& val); //adds element to the head of the list
+	 void push_front(const T& val); //adds element to the head of the list
 	 void pop_front(); //removes element from the front
+	 void push_end(const T& val); //adds an element to the end of the list
+	 void pop_back(); //removes an element from the end of the list
 
-	 T& front();//returns the element at the head
-	 T& back(); // returns the element at the tail
+	 T& front();//returns the data at the head
+	 T& back(); // returns the data at the tail
 };
 
 //constructor
@@ -73,6 +75,76 @@ template<typename T>
 	 if (head != nullptr) //in case the new head was null like when we remove the entire list
 	 {
 		 head->prev = nullptr; //setting head prev to nullpointer!
+	 }else
+	 {
+		 //just in case because if there is no head to the list there also wouldn't be a tail
+		 tail = nullptr;
 	 }
+ }
+ template<typename T>
+ void tList<T>::push_front(const T& val)
+ {
+	 node* origHead = head;
+	 head = new node{ val, origHead, nullptr }; //just so I can debug easier this goes; data, ->next, ->prev
+	 if(origHead!=nullptr) // whenever i add or remove something i wanna run this check so that I can make sure I had something there originally
+	 {
+		 origHead->prev = head;
+	 }
+	 if(tail==nullptr) // a solid check so I can iterate through the list and locate where the tail should be if it doesn't already exist
+	 {
+		 node* tmpNode = head; //creating a temporary node at the head
+		 while(tmpNode->next != nullptr) //iterates through until we find a node that doesn't have a node following it
+		 {
+			 tmpNode = tmpNode->next;
+		 }
+		 tail = tmpNode; //set the tail to the last item in the list
+	 }
+ }
+ template<typename T>
+ void tList<T>::push_end(const T& val) //should essentially be the opposite of the push_front except using the tail and prev
+ {
+	 node* origTail = tail;
+	 tail = new node{ val, nullptr, origTail }; //data, next, prev
+	 if(origTail!=nullptr) //same reasoning as before I want to make sure if i add something 
+	 {
+		 origTail->next = tail;
+	 }
+	 if(head == nullptr)//checking if there was a front, if this new added element was the first one this check will set a head
+	 {
+		 node* tmpNode = tail; //creating a temporary node at the tail for backwards iteration
+		 while (tmpNode->prev != nullptr) //iterates through until we find a node that doesn't have a node before it
+		 {
+			 tmpNode = tmpNode->prev;
+		 }
+		 head = tmpNode; //set the head to the last item in the list
+	 }
+ }
+ template<typename T>
+ void tList<T>::pop_back()//same concept as deleting from the front just using prev instead of next
+ {
+	 node* newTail = tail->prev;
+	 delete tail;
+	 tail = newTail;
+
+	 if(tail!=nullptr) //if there is a node there lets remove the 
+	 {
+		 tail->next = nullptr;
+	 }
+	 else //pretty basic if the tail is null it is safe to assume the head is as well 
+	 {
+		 head = nullptr;
+	 }
+
+ }
+
+ template <typename T>
+ T& tList<T>::front()
+ {
+	 return head->data;
+ }
+ template <typename T>
+ T& tList<T>::back()
+ {
+	 return tail->data;
  }
 
