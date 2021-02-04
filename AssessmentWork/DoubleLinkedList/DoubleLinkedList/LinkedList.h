@@ -25,6 +25,13 @@ public:
 
 	 T& front();//returns the data at the head
 	 T& back(); // returns the data at the tail
+
+	 const T& front() const; //returns the const element at the head
+
+	 void remove(const T& val); //removes the node that matches the val
+	 void clear(); //removes all the nodes in the linked list
+
+	 bool empty() const; //checks if the list is empty
 };
 
 //constructor
@@ -136,15 +143,49 @@ template<typename T>
 	 }
 
  }
-
+template <typename T>
+void tList<T>::remove(const T& val)
+{
+	node** tmpNode = &head; //first things first we gotta set the first temp node to the head
+	while((*tmpNode)->next->data!=val) //basic check checking to see if the next node
+	{
+		tmpNode = &((*tmpNode)->next);
+	}
+	node* tmpNode2 = (*tmpNode)->next->next; //skipping one so we can set the next and prev when we remove a value
+	delete (*tmpNode)->next; //deleting the node that matched up
+	(*tmpNode)->next = tmpNode2;
+	tmpNode2->prev = (*tmpNode);
+}
+template <typename T>
+void tList<T>::clear()
+{
+	node* endNode = head; //the node to kill all others!!!!
+	while(endNode !=nullptr)//once I remove all nodes this node will be null
+	{
+		node* nextNode = endNode->next; //just to set an extra node for the delete keyword
+		delete endNode;
+		endNode = nextNode; //now the end node is the node that was endNode->next
+	}
+	head = nullptr;
+	tail = nullptr;
+}
+template <typename T>
+bool tList<T>::empty() const
+{
+	return head == nullptr; //if this returns true the list should be empty
+}
  template <typename T>
  T& tList<T>::front()
  {
-	 return head->data;
+	 return head->data; //returning data
  }
  template <typename T>
  T& tList<T>::back()
  {
-	 return tail->data;
+	 return tail->data;//returning data
  }
-
+ template <typename T>
+ const T& tList<T>::front() const
+ {
+	 return head->data; //returning data not much to this method, idk what to say here lol
+ }
