@@ -32,7 +32,39 @@ public:
 	 void clear(); //removes all the nodes in the linked list
 
 	 bool empty() const; //checks if the list is empty
+
+	 void resize(size_t newSize); //resizes the list deleting excess defaulting additional
+	 int getSize();//gonna need this for the resize method
+
+	 void sort();//sorts the list
+
+	 void print(); //prints the list
+	 //iterator stuff ;-;
+	 class iterator
+	 {
+		 //current node to work on
+		 node* cur; //does this only work if template is used again? I put it inside the tList class to remove this error
+		 tList* list; //adding this to make some of the methods easier
+
+	 public:
+		 //constructors
+		 iterator();
+		 iterator(tList *List, node *startNode);
+		 //operators
+		 bool operator ==( iterator& rhs); //returns true if the iterator points to the same node, not sure if it needs const?
+		 bool operator !=( iterator& rhs); //returns false if the iterator is not pointing to the same node, this seems the same as last one? well I'll know when i make it
+		 T& operator*() const; //returns ref to the element pointed to by current node
+
+		 iterator &operator++(); //returns ref to this iterator after incremented
+		 iterator operator++(int);//returns an iterator to current while the existing iterator is incremented
+		 iterator &operator--();//decrements
+		 iterator operator--(int);//opposite of ++int
+
+	 };
+	 iterator begin(); //returns iterator pointing to first node
+	 iterator end(); //returns iterator pointing to the last node
 };
+
 
 //constructor
 template<typename T>
@@ -189,3 +221,140 @@ bool tList<T>::empty() const
  {
 	 return head->data; //returning data not much to this method, idk what to say here lol
  }
+ template <typename T>
+ void tList<T>::resize(size_t size)
+ {
+	 int origSize = getSize();  //first get our value
+	 if(size>origSize)//compare the values to see what I gotta do
+	 {
+		 int newSize = size - origSize; //I think this works? 
+		 while(newSize>0)//should iterate once for every whole number over origSize, for example if it is 5 it will go 5, 4, 3, 2, and 1
+		 {
+			 push_end(0);//add one default value to the end
+			 newSize--;
+		 }
+	 }else if(size<origSize) //reverse of if statement
+	 {
+		 int newSize = origSize - size; //this SHOULD work
+		 while(newSize>0)//should count for each of em
+		 {
+			 pop_back();//remove a node at the end
+			 newSize--;
+		 }
+	 }//no need to check if the size entered is equal because it will just skip these statements and end the method no resizing needed
+ }
+ template <typename T>
+ int tList<T>::getSize()
+ {
+	 if(head!=nullptr)//just to make sure I can return something
+	 {
+		 node* cntNode = head; //a node to count the others
+		 int count = 1; //counting for the head
+		while(cntNode->next !=nullptr) //if the head is the only value in here this SHOULD not even run
+		{
+			cntNode = cntNode->next;
+			count++;
+		}
+		return count; //return count once we are done
+	 }else
+	 {
+		 return 0;
+	 }
+ }
+ template <typename T>
+ void tList<T>::sort()
+ {
+	 //this will be null for now cause I like for loops better than while
+	 node* current = nullptr; //the current node
+	 node* nextNode = nullptr; //the currents next
+	 int saver; //to save data when we swap
+	 //first make sure the list has something to sort
+	 if (head == nullptr)
+	 {
+		 return; //quit if there is no list
+	 }
+	 else 
+	 {
+		 //nested for loop time, we start at the head
+		 //this will save me a few times, set the current working node to the head, end this loop if it hits the end, and finally gonna increment each iteration
+		 for (current = head; current->next != nullptr; current = current->next)
+		 {
+			 for (nextNode = current->next; nextNode != nullptr; next = nextNode->next) //this will be used to check against the current node to sort the list
+			 {
+				 //if the current node is greater than its next node's data then I flip em around
+				 if (current->data > nextNode->data)
+				 {
+					 saver = current->data; //time for saver to do its job save my stuff
+					 current->data = nextNode->data;//the swap
+					 nextnode->data = temp;//the saver finishing the swap
+				 }
+			 }
+		 }
+	 }
+ }
+ template <typename T>
+ tList<T>::iterator::iterator() //class, method(constructor here)
+ {
+	 list = NULL;
+	 cur = nullptr;
+ }
+ template <typename T>
+ tList<T>::iterator::iterator(tList *List, node *startNode)//reasonably basic constructors
+ {
+	 list = List; 
+	 cur = startNode;
+ }
+ //iterator operators
+ template <typename T>
+ bool tList<T>::iterator::operator ==(iterator &rhs)//pretty basic returns for these first two
+ {
+	 return(list == rhs.list) && (cur == rhs.cur);
+ }
+ template <typename T>
+ bool tList<T>::iterator::operator !=(iterator &rhs)
+ {
+	 return (list != rhs.list) || (cur != rhs.cur);
+ }
+ template <typename T>
+ T& tList<T>::iterator::operator*() const //this one just returns the next node so gonna do it simply and not overthink it
+ {
+	 return cur->next;
+ }
+ template <typename T>
+ typename tList<T>::iterator &tList<T>::iterator::operator++() //this feels super wack but compiller said this is how this method would be written xD
+ {
+	 cur = cur->next;
+	 return *cur; //returning the ref to the link after the current one
+ }
+ template <typename T>
+ typename tList<T>::iterator tList<T>::iterator::operator++(int)
+ {
+	 iterator tmpIterator = *cur; //gotta grab the ref first
+	 cur = cur->next;
+	 return tmpIterator; //return the ref after incrementing the current
+ }
+ template <typename T>
+ typename tList<T>::iterator& tList<T>::iterator::operator--() //these two SHOULD just be inverses of the last two methods.
+ {
+	 cur = cur->prev;
+	 return *cur; //returning the ref to the node before the current one
+ }
+ template <typename T>
+ typename tList<T>::iterator tList<T>::iterator::operator--(int)
+ {
+	 iterator tmpIterator = *cur; //gotta grab the ref first
+	 cur = cur->prev;
+	 return tmpIterator; //return the ref after decrementing the current
+ }
+ template <typename T>
+ typename tList<T>::iterator tList<T>::begin()
+ {
+	 return iterator(this, head); //all i gotta do is return head here to get first node
+ }
+ template <typename T>
+ typename tList<T>::iterator tList<T>::end()
+ {
+	 return iterator(this, tail); //opposite of last one
+ }
+
+
