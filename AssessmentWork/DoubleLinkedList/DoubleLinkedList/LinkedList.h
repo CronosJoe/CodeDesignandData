@@ -60,6 +60,8 @@ public:
 		 iterator &operator--();//decrements
 		 iterator operator--(int);//opposite of ++int
 
+		 iterator insert(const iterator& it, const T& val); //adds a node after it with the data val
+
 	 };
 	 iterator begin(); //returns iterator pointing to first node
 	 iterator end(); //returns iterator pointing to the last node
@@ -267,7 +269,7 @@ bool tList<T>::empty() const
 	 //this will be null for now cause I like for loops better than while
 	 node* current = nullptr; //the current node
 	 node* nextNode = nullptr; //the currents next
-	 int saver; //to save data when we swap
+	 T saver; //to save data when we swap, since data is type T this should be the same type as the data 100% of the time
 	 //first make sure the list has something to sort
 	 if (head == nullptr)
 	 {
@@ -290,6 +292,17 @@ bool tList<T>::empty() const
 				 }
 			 }
 		 }
+	 }
+ }
+ template <typename T>
+ void tList<T>::print()
+ {
+	 std::cout << "" << std::endl;
+	 node* current = head;
+	 while(current!=nullptr)
+	 {
+		 std::cout << current->data;
+		 current = current->next;
 	 }
  }
  template <typename T>
@@ -355,6 +368,15 @@ bool tList<T>::empty() const
  typename tList<T>::iterator tList<T>::end()
  {
 	 return iterator(this, tail); //opposite of last one
+ }
+ template <typename T>
+ typename tList<T>::iterator tList<T>::iterator::insert(const iterator& it, const T& val) //this method length scares me
+ {
+	 node* beforeNode = it->cur; //nab that reference to the spot before where I gotta edit
+	 node* spotNode = beforeNode->next; //to save important prev data
+	 node* newNode = new node{ val, beforeNode,spotNode };//data, next, prev
+	 beforeNode->next = newNode;
+	 spotNode->prev = newNode;//adding in the prev/next data we need
  }
 
 
