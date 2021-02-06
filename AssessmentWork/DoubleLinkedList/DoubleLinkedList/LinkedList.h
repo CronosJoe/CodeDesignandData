@@ -1,7 +1,7 @@
 #pragma once
 #include <cstddef>
 #include <iostream>
-
+using namespace std;
 template<typename T>
 class tList
 {
@@ -100,7 +100,7 @@ template<typename T>
  template<typename T>
  tList<T>::~tList()
  {
-	 while (head != nullptr) //this will delete the list by removing each object until the heal is a null pointer again
+	 while (head != nullptr) //this will delete the list by removing each object until the head is a null pointer again
 	 {
 		 pop_front();
 	 }

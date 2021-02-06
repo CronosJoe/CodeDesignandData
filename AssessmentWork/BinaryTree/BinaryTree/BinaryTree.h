@@ -16,18 +16,19 @@ public:
 
 		vertex();//default constructor
 		vertex(T data);
-		void remove(vertex* target); //removes a vertex at the target, need to add
+		void remove(vertex* target); //removes a vertex at the target
 		void insert(const T& val); //inserts the element as a leaf, unless there is a duplicate number on the tree
 		bool search(const T& value, vertex*& found); //looks for a vertex and adds it to found then returns if it found the vertex or not
 		bool hasLeft() const; //checks if there is a left node
 		bool hasRight() const; //checks if there is a right node
+		vertex* minValueNode(vertex* startNode); //finds the leftmost node starting at a specified point
 	};
 
 	tBinaryTree(); //tree constructor
 	tBinaryTree(const tBinaryTree& other); //copy constructor, need to be implmented
 	~tBinaryTree();//tree deconstructor
 
-	tBinaryTree& operator=(const tBinaryTree& other);
+	tBinaryTree& operator=(const tBinaryTree& other); //need to add
 	void destroyTree(vertex* point); //deletes everything under a specific vertex
 private:
 	std::vector<vertex*>  vertices; //a vector of pointers to vertices
@@ -121,7 +122,35 @@ void tBinaryTree<T>::vertex::insert(const T& val)//time to drop in the vals
 }
 template <typename T>
 void tBinaryTree<T>::vertex::remove(vertex* target)
-{}
+{
+	//assuming target is not null
+	//first check for children
+	if(target->hasLeft() && target->hasRight())//if this comes out to true then we need to do the difficult solution of finding the smallest leftmost node and bringing it up
+	{
+		//okay first we gotta find the left most node on the right side so that the tree still works
+		vertex* temp = minValueNode(target->right); 
+		//now that we have our node we just replace and delete just like if we had 1 child node
+		target->data = temp->data; //replace
+		delete temp; //delete that leftmost node now that we have deleted it
+	}
+	else if(target->hasLeft())//has one child or none since last check failed
+	{
+		vertex* temp = target->left;//save the left node to a pointer for easy transfer
+		target = temp; //overwrite the target effectively deleting it, since this is saving as a node this should also say the left/right if the child had any
+		delete target->left; //remove the old child since this one now has that data
+
+	}
+	else if(target->hasRight())//has one child
+	{
+		vertex* temp = target->right;//save the right node to a pointer for easy transfer
+		target = temp; //overwrite the target effectively deleting it
+		delete target->right; //remove the old child since this one now has that data
+	}
+	else//no child easy peasy
+	{
+		delete target;
+	}
+}
 template <typename T>
 bool tBinaryTree<T>::vertex::search(const T& value, vertex*& found)
 {
@@ -168,6 +197,19 @@ template <typename T>
 		 }
 		 delete point;//finally remove the current called node
 	 }
+ }
+ template <typename T>
+ tBinaryTree<T>::vertex* tBinaryTree<T>::vertex::minValueNode(vertex* startNode)
+ {
+	 //I only need to get the data here since this is a leftmost node which means it will have no children
+	 vertex* cur = node; //getting a good easy node to work from
+
+	 //looping down to find the leftmost
+	 while(cur && cur->left !=nullptr)
+	 {
+		 cur = cur->left;
+	 }
+	 return cur; //return the data
  }
 
 
