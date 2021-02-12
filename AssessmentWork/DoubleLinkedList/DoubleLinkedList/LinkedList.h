@@ -20,7 +20,7 @@ public:
 
 	 void push_front(const T& val); //adds element to the head of the list
 	 void pop_front(); //removes element from the front
-	 void push_end(const T& val); //adds an element to the end of the list
+	 void push_back(const T& val); //adds an element to the end of the list
 	 void pop_back(); //removes an element from the end of the list
 
 	 T& front();//returns the data at the head
@@ -60,9 +60,10 @@ public:
 		 iterator &operator--();//decrements
 		 iterator operator--(int);//opposite of ++int
 
-		 iterator insert(const iterator& it, const T& val); //adds a node after it with the data val
+		 
 
 	 };
+	 iterator insert(const iterator& it, const T& val); //adds a node after it with the data val
 	 iterator begin(); //returns iterator pointing to first node
 	 iterator end(); //returns iterator pointing to the last node
 };
@@ -78,7 +79,7 @@ template<typename T>
 }
  //copy constructor
  template<typename T>
- tList<T>::tList(const tList& otherNode) //constructor to copy another list
+ tList<T>::tList(const tList& other) //constructor to copy another list
  {
 	 head = new node{ other.head->data, nullptr, nullptr }; //data, next, previous
 
@@ -142,7 +143,7 @@ template<typename T>
 	 }
  }
  template<typename T>
- void tList<T>::push_end(const T& val) //should essentially be the opposite of the push_front except using the tail and prev
+ void tList<T>::push_back(const T& val) //should essentially be the opposite of the push_front except using the tail and prev
  {
 	 node* origTail = tail;
 	 tail = new node{ val, nullptr, origTail }; //data, next, prev
@@ -181,14 +182,18 @@ template <typename T>
 void tList<T>::remove(const T& val)
 {
 	node** tmpNode = &head; //first things first we gotta set the first temp node to the head
-	while((*tmpNode)->next->data!=val) //basic check checking to see if the next node
+	while((*tmpNode)->next!=nullptr) //basic check checking to see if we have reached the end of the list
 	{
-		tmpNode = &((*tmpNode)->next);
+		if ((*tmpNode)->next->data != val)//remove the value
+		{
+			node* tmpNode2 = (*tmpNode)->next->next; //skipping one so we can set the next and prev when we remove a value
+			delete (*tmpNode)->next; //deleting the node that matched up
+			(*tmpNode)->next = tmpNode2;
+			tmpNode2->prev = (*tmpNode);
+		}
+		tmpNode = &((*tmpNode)->next);//continue with the loop in case of multiples.
 	}
-	node* tmpNode2 = (*tmpNode)->next->next; //skipping one so we can set the next and prev when we remove a value
-	delete (*tmpNode)->next; //deleting the node that matched up
-	(*tmpNode)->next = tmpNode2;
-	tmpNode2->prev = (*tmpNode);
+	
 }
 template <typename T>
 void tList<T>::clear()
@@ -232,7 +237,7 @@ bool tList<T>::empty() const
 		 int newSize = size - origSize; //I think this works? 
 		 while(newSize>0)//should iterate once for every whole number over origSize, for example if it is 5 it will go 5, 4, 3, 2, and 1
 		 {
-			 push_end(0);//add one default value to the end
+			 push_back(0);//add one default value to the end
 			 newSize--;
 		 }
 	 }else if(size<origSize) //reverse of if statement
@@ -329,20 +334,20 @@ bool tList<T>::empty() const
 	 return (list != rhs.list) || (cur != rhs.cur);
  }
  template <typename T>
- T& tList<T>::iterator::operator*() const //this one just returns the next node so gonna do it simply and not overthink it
+ T& tList<T>::iterator::operator*() const //dereferences the node so it will return the data
  {
-	 return cur->next;
+	 return cur->data;
  }
  template <typename T>
  typename tList<T>::iterator &tList<T>::iterator::operator++() //this feels super wack but compiller said this is how this method would be written xD
  {
 	 cur = cur->next;
-	 return *cur; //returning the ref to the link after the current one
+	 return *this; //returning the ref to the link after the current one
  }
  template <typename T>
  typename tList<T>::iterator tList<T>::iterator::operator++(int)
  {
-	 iterator tmpIterator = *cur; //gotta grab the ref first
+	 iterator tmpIterator = *this; //gotta grab the ref first
 	 cur = cur->next;
 	 return tmpIterator; //return the ref after incrementing the current
  }
@@ -350,12 +355,12 @@ bool tList<T>::empty() const
  typename tList<T>::iterator& tList<T>::iterator::operator--() //these two SHOULD just be inverses of the last two methods.
  {
 	 cur = cur->prev;
-	 return *cur; //returning the ref to the node before the current one
+	 return *this; //returning the ref to the node before the current one
  }
  template <typename T>
  typename tList<T>::iterator tList<T>::iterator::operator--(int)
  {
-	 iterator tmpIterator = *cur; //gotta grab the ref first
+	 iterator tmpIterator = *this; //gotta grab the ref first
 	 cur = cur->prev;
 	 return tmpIterator; //return the ref after decrementing the current
  }
@@ -367,10 +372,10 @@ bool tList<T>::empty() const
  template <typename T>
  typename tList<T>::iterator tList<T>::end()
  {
-	 return iterator(this, tail); //opposite of last one
+	 return iterator(this, nullptr); //should always return nullptr
  }
  template <typename T>
- typename tList<T>::iterator tList<T>::iterator::insert(const iterator& it, const T& val) //this method length scares me
+ typename tList<T>::iterator tList<T>::insert(const iterator& it, const T& val) //this method length scares me
  {
 	 node* beforeNode = it->cur; //nab that reference to the spot before where I gotta edit
 	 node* spotNode = beforeNode->next; //to save important prev data
