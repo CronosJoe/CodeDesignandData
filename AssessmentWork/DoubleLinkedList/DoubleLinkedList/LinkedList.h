@@ -182,16 +182,24 @@ template <typename T>
 void tList<T>::remove(const T& val)
 {
 	node** tmpNode = &head; //first things first we gotta set the first temp node to the head
-	while((*tmpNode)->next!=nullptr) //basic check checking to see if we have reached the end of the list
+	if ((*tmpNode)->data == val)//checking an edge case, because my if statement inside the loop never checks the head
 	{
-		if ((*tmpNode)->next->data != val)//remove the value
+		node* tmpNode2 = (*tmpNode)->next;
+		delete head;//I'm just gonna do it this way cause it'll be easier going forward
+		head = tmpNode2;
+		tmpNode2->prev = nullptr;
+		tmpNode = tmpNode2; //finally setting it up so the rest of the function will work
+	}
+	while((*tmpNode)!=nullptr) //basic check checking to see if we have reached the end of the list, I'm checking until tmpnode is a null because once it is a null I would have checked the entire list
+	{
+		if ((*tmpNode)->next->data == val)//remove the value if its next nodes data is equal to the searched for value
 		{
 			node* tmpNode2 = (*tmpNode)->next->next; //skipping one so we can set the next and prev when we remove a value
 			delete (*tmpNode)->next; //deleting the node that matched up
 			(*tmpNode)->next = tmpNode2;
 			tmpNode2->prev = (*tmpNode);
 		}
-		tmpNode = &((*tmpNode)->next);//continue with the loop in case of multiples.
+		tmpNode = &((*tmpNode)->next);//continue with the loop to make sure we get the dups
 	}
 	
 }
