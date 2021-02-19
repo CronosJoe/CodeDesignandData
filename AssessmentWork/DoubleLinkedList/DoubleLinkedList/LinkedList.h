@@ -41,6 +41,7 @@ public:
 	 void print(); //prints the list
 
 	 //Add copy operator 
+	 //tList& operator=(const tList& rhs);
 	 //iterator stuff ;-;
 	 class iterator
 	 {
@@ -83,21 +84,12 @@ template<typename T>
  template<typename T>
  tList<T>::tList(const tList& other) //constructor to copy another list
  {
-	 head = new node{ other.head->data, nullptr, nullptr }; //data, next, previous
-
-	 node* nextNode = other.head->next;
-	 node* copyNode = head;
-	 node* prevNode = nullptr; //since this first one is the head
-
-	 while (nextNode != nullptr)
+	 node* cur = other.head; //first creating a node for use to work with for the loop and the assignment
+	 while (cur != nullptr) //loop till the other list is done
 	 {
-		 *copyNode->next = new node{ nextNode->data,nullptr,nullptr }; //this will overwrite the copy node(the one we are working on) with the next one in the list should let us change out of scope since it is a reference
-		 copyNode->prev = prevNode;
-		 prevNode = copyNode;
-		 copyNode = copyNode->next; 
-		 nextNode = nextNode->next;
+		 push_back(cur->data);//continue slapping it onto the end
+		 cur=cur->next;
 	 }
-	 tail = copyNode; //finally set the tail to the last node
  }
  //destructor
  template<typename T>
@@ -183,34 +175,40 @@ template<typename T>
 template <typename T>
 void tList<T>::remove(const T& val)
 {
-	node** tmpNode = &head; //first things first we gotta set the first temp node to the head
-	if ((*tmpNode)->data == val)//checking an edge case, because my if statement inside the loop never checks the head
+	node* tmpNode = head; //first things first we gotta set the first temp node to the head
+	node* nextNode = new node();
+	node* prevNode = new node();
+	while(tmpNode != nullptr)//as long as we are not at the end of the list
 	{
-		node* tmpNode2 = (*tmpNode)->next;
-		delete head;//I'm just gonna do it this way cause it'll be easier going forward
-		head = tmpNode2;
-		tmpNode2->prev = nullptr;
-		tmpNode = tmpNode2; //finally setting it up so the rest of the function will work
-	}
-	while((*tmpNode)!=nullptr) //basic check checking to see if we have reached the end of the list, I'm checking until tmpnode is a null because once it is a null I would have checked the entire list
-	{
-		if ((*tmpNode)->next->data == val)//remove the value if its next nodes data is equal to the searched for value
+		if(tmpNode->data == val)//this should handle edge cases since I am starting at the head and it doesn't end until tmpnode is after the tail
 		{
-			if((*tmpNode)->next == tail)//tail edge case
+			nextNode = tmpNode->next; //saving the next spots pointer for when we delete tmpNode, this only will be nullptr if the tmpNode is the tail
+			prevNode = tmpNode->prev;
+			if(tmpNode == head) //if front
 			{
-				delete (*tmpNode)->next;
-				tmpNode->next = nullptr;
-				tail = tmpNode;
-			}
-			else 
+			//should be straight forward
+				delete tmpNode; //delete the head
+				nextNode->prev = nullptr; //making sure this goes right not gonna leave it up to visual studio
+				head = nextNode; //head becomes the node we had saved up above
+				tmpNode = nextNode; //so that we can continue with our function
+			}else if(tmpNode == tail) //if end
 			{
-				node* tmpNode2 = (*tmpNode)->next->next; //skipping one so we can set the next and prev when we remove a value
-				delete (*tmpNode)->next; //deleting the node that matched up
-				(*tmpNode)->next = tmpNode2;
-				tmpNode2->prev = (*tmpNode);
+				delete tmpNode; //delete the tail
+				prevNode->next = nullptr; //not leaving to vs to do nullptr
+				tail = prevNode;//set the new tail
+				tmpNode = nullptr; //since tmpNode was on the tail it should now be nullptr so that it can end this while loop
 			}
+			else //if anywhere in the middle
+			{
+				delete tmpNode; //deleting the one with the value
+				prevNode->next = nextNode; //fix the linked list
+				nextNode->prev = prevNode; //both ways
+				tmpNode = nextNode; //so that we can continue with the loop
+			}
+		}else
+		{
+			tmpNode = tmpNode->next; //continue on, the only time this won't be run is if the val matched up
 		}
-		tmpNode = &((*tmpNode)->next);//continue with the loop to make sure we get the dups
 	}
 	
 }
@@ -305,7 +303,7 @@ bool tList<T>::empty() const
 		 //this will save me a few times, set the current working node to the head, end this loop if it hits the end, and finally gonna increment each iteration
 		 for (current = head; current->next != nullptr; current = current->next)
 		 {
-			 for (nextNode = current->next; nextNode != nullptr; next = nextNode->next) //this will be used to check against the current node to sort the list
+			 for (nextNode = current->next; nextNode != nullptr; nextNode = nextNode->next) //this will be used to check against the current node to sort the list
 			 {
 				 //if the current node is greater than its next node's data then I flip em around
 				 if (current->data > nextNode->data)
