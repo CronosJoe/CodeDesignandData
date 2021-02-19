@@ -39,6 +39,8 @@ public:
 	 void sort();//sorts the list
 
 	 void print(); //prints the list
+
+	 //Add copy operator 
 	 //iterator stuff ;-;
 	 class iterator
 	 {
@@ -194,10 +196,19 @@ void tList<T>::remove(const T& val)
 	{
 		if ((*tmpNode)->next->data == val)//remove the value if its next nodes data is equal to the searched for value
 		{
-			node* tmpNode2 = (*tmpNode)->next->next; //skipping one so we can set the next and prev when we remove a value
-			delete (*tmpNode)->next; //deleting the node that matched up
-			(*tmpNode)->next = tmpNode2;
-			tmpNode2->prev = (*tmpNode);
+			if((*tmpNode)->next == tail)//tail edge case
+			{
+				delete (*tmpNode)->next;
+				tmpNode->next = nullptr;
+				tail = tmpNode;
+			}
+			else 
+			{
+				node* tmpNode2 = (*tmpNode)->next->next; //skipping one so we can set the next and prev when we remove a value
+				delete (*tmpNode)->next; //deleting the node that matched up
+				(*tmpNode)->next = tmpNode2;
+				tmpNode2->prev = (*tmpNode);
+			}
 		}
 		tmpNode = &((*tmpNode)->next);//continue with the loop to make sure we get the dups
 	}
@@ -301,7 +312,7 @@ bool tList<T>::empty() const
 				 {
 					 saver = current->data; //time for saver to do its job save my stuff
 					 current->data = nextNode->data;//the swap
-					 nextnode->data = temp;//the saver finishing the swap
+					 nextNode->data = saver;//the saver finishing the swap
 				 }
 			 }
 		 }
@@ -314,7 +325,7 @@ bool tList<T>::empty() const
 	 node* current = head;
 	 while(current!=nullptr)
 	 {
-		 std::cout << current->data;
+		 std::cout << current->data; //should print only data
 		 current = current->next;
 	 }
  }

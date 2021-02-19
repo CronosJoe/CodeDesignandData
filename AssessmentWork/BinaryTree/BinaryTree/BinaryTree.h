@@ -16,14 +16,15 @@ public:
 
 		vertex();//default constructor
 		vertex(T data);
-		void remove(vertex* target); //removes a vertex at the target
-		void insert(const T& val); //inserts the element as a leaf, unless there is a duplicate number on the tree
-		bool search(const T& value, vertex*& found); //looks for a vertex and adds it to found then returns if it found the vertex or not
+		
 		bool hasLeft() const; //checks if there is a left node
 		bool hasRight() const; //checks if there is a right node
-		vertex* minValueNode(vertex* startNode); //finds the leftmost node starting at a specified point
+		
 	};
-
+	void remove(vertex* target); //removes a vertex at the target
+	void insert(const T& val); //inserts the element as a leaf, unless there is a duplicate number on the tree
+	bool search(const T& value, vertex*& found); //looks for a vertex and adds it to found then returns if it found the vertex or not
+	vertex* minValueNode(vertex* startNode); //finds the leftmost node starting at a specified point
 	tBinaryTree(); //tree constructor
 	tBinaryTree(const tBinaryTree& other); //copy constructor, need to be implmented
 	~tBinaryTree();//tree deconstructor
@@ -81,7 +82,7 @@ tBinaryTree<T>::~tBinaryTree()//this will deconstruct the tree
 	}
 }
 template<typename T>
-void tBinaryTree<T>::vertex::insert(const T& val)//time to drop in the vals
+void tBinaryTree<T>::insert(const T& val)//time to drop in the vals
 {
 	if(val==data)//if it matches somewhere on the tree we return out
 	{
@@ -121,7 +122,7 @@ void tBinaryTree<T>::vertex::insert(const T& val)//time to drop in the vals
 	return;//because the entire thing is if else statements once they return to this iteration of the recursion they will simply exit their if and all end up here
 }
 template <typename T>
-void tBinaryTree<T>::vertex::remove(vertex* target)
+void tBinaryTree<T>::remove(vertex* target)
 {
 	//assuming target is not null
 	//first check for children
@@ -152,7 +153,7 @@ void tBinaryTree<T>::vertex::remove(vertex* target)
 	}
 }
 template <typename T>
-bool tBinaryTree<T>::vertex::search(const T& value, vertex*& found)
+bool tBinaryTree<T>::search(const T& value, vertex*& found)
 {
 	//first our basic if else
 	if(value == data) //this will be our determining check
@@ -199,7 +200,7 @@ template <typename T>
 	 }
  }
  template <typename T>
- tBinaryTree<T>::vertex* tBinaryTree<T>::vertex::minValueNode(vertex* startNode)
+ tBinaryTree<T>::vertex* tBinaryTree<T>::minValueNode(vertex* startNode)
  {
 	 //I only need to get the data here since this is a leftmost node which means it will have no children
 	 vertex* cur = node; //getting a good easy node to work from
