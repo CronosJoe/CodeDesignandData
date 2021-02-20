@@ -14,13 +14,14 @@ public:
 		//right side
 		vertex* right;
 
-		vertex();//default constructor
+		vertex();//default constructor 
 		vertex(T data);
 		
 		bool hasLeft() const; //checks if there is a left node
 		bool hasRight() const; //checks if there is a right node
 		
 	};
+	//need to fix implemented wrong last time
 	void remove(vertex* target); //removes a vertex at the target
 	void insert(const T& val); //inserts the element as a leaf, unless there is a duplicate number on the tree
 	bool search(const T& value, vertex*& found); //looks for a vertex and adds it to found then returns if it found the vertex or not
@@ -31,52 +32,54 @@ public:
 
 	tBinaryTree& operator=(const tBinaryTree& other); //need to add
 	void destroyTree(vertex* point); //deletes everything under a specific vertex
+	vertex* root;
 private:
 	std::vector<vertex*>  vertices; //a vector of pointers to vertices
 
-	vertex* root;
+	
+	vertex* cur; //making this for the remove/insert/search
 };
 
 template <typename T>
 bool tBinaryTree<T>::vertex::hasLeft() const
 {
-	return left != nullptr; //pretty basic it will return true if there is a vertex on the left and false if there isn't
+	return this->left != NULL; //pretty basic it will return true if there is a vertex on the left and false if there isn't
 }
 template <typename T>
 bool tBinaryTree<T>::vertex::hasRight() const
 {
-	return right != nullptr; //reverse of the left one
+	return this->right != NULL; //reverse of the left one
 }
 
 //constructors
 template <typename T>
 tBinaryTree<T>::vertex::vertex()
 {
-	//since there is no data in there yet lets just null the two vertices and just leave the data be until we add our first real node
-	left = nullptr;
-	right = nullptr;
+	//since there is no data in there yet lets just NULL the two vertices and just leave the data be until we add our first real node
+	left = NULL;
+	right = NULL;
 }
 template <typename T>
 tBinaryTree<T>::vertex::vertex(T nData)
 {
-	data = nData
-	left = nullptr;
-	right = nullptr;
+	data = nData;
+	left = NULL;
+	right = NULL;
 }
 template <typename T>
 tBinaryTree<T>::tBinaryTree()
 {
-	root = nullptr; //pretty basic since this is the only variable until we actually have vertices
+	root = NULL; //pretty basic since this is the only variable until we actually have vertices
 }
 template<typename T>
 tBinaryTree<T>::tBinaryTree(const tBinaryTree &other)//constructor for copying another binary tree into this one
 {
-	//need to implement
+	//I should be able to do this by getting the values out of the other tree and just let my insert method handle the rest
 }
 template<typename T>
 tBinaryTree<T>::~tBinaryTree()//this will deconstruct the tree
 {
-	if(root !=nullptr)
+	if(root !=NULL)
 	{
 		destroyTree(root); //this should eliminate the entire tree if I did it correctly
 	}
@@ -84,98 +87,204 @@ tBinaryTree<T>::~tBinaryTree()//this will deconstruct the tree
 template<typename T>
 void tBinaryTree<T>::insert(const T& val)//time to drop in the vals
 {
-	if(val==data)//if it matches somewhere on the tree we return out
+	if(cur == NULL)//this will only be true on the original call of this method
+	{
+		cur = root;
+	}
+	if(root == NULL) //if there is no value set this as the root.
+	{
+		vertex* newRoot = new vertex(val);
+		root = newRoot;
+		return;
+	}
+	if(val==cur->data)//if it matches somewhere on the tree we return out
 	{
 		return;
 	}
-	else if(val<data) //left side
+	else if(val<cur->data) //left side
 	{
-		if(!hasLeft())//check if something is there
+		if(!cur->hasLeft())//check if something is there
 		{
 			vertex* tmp = new vertex;
-			left = tmp;//make the new vertex and shove everything into it
-			left->data = val;
-			left->left = nullptr;//nulling these cause they will be empty to start
-			left->right = nullptr;
-			vertices.push_back(left);//add them to vertices when I make them
+			cur->left = tmp;//make the new vertex and shove everything into it
+			tmp->data = val;
+			tmp->left = NULL;//nulling these cause they will be empty to start
+			tmp->right = NULL;
+			vertices.push_back(tmp);//add them to vertices when I make them
+			
 		}else
 		{
-			left->insert(val);//continue down the line
+			cur = cur->left;
+			this->insert(val);//continue down the line, this doesn't work cause there is no way to tell the cur
 		}
 	}
-	else if(val>data)//right side
+	else if(val> cur->data)//right side
 	{
-		if (!hasRight())//check if something is there
+		if (!cur->hasRight())//check if something is there
 		{
 			vertex* tmp = new vertex;
-			right = tmp;//make the new vertex and shove everything into it
-			right->data = val;
-			right->left = nullptr;//nulling these cause they will be empty to start
-			right->right = nullptr;
-			vertices.push_back(right);
+			cur->right = tmp;//make the new vertex and shove everything into it
+			tmp->data = val;
+			tmp->left = NULL;//nulling these cause they will be empty to start
+			tmp->right = NULL;
+			vertices.push_back(tmp);//I should update this idea but tbh I haven't at all
 		}
 		else
 		{
-			right->insert(val);//continue down the line
+			cur = cur->right;
+			this->insert(val);//continue down the line
 		}
 	}
-	return;//because the entire thing is if else statements once they return to this iteration of the recursion they will simply exit their if and all end up here
+	cur = NULL; //reset the entire system
+	return; //because the entire thing is if else statements once they return to this iteration of the recursion they will simply exit their if and all end up here
 }
 template <typename T>
 void tBinaryTree<T>::remove(vertex* target)
 {
-	//assuming target is not null
+	//we also have to assume the target exists or this entire method's logic doesn't work
+	//very first edge case
+	if(root->data == target->data)
+	{
+		delete target;
+		root = NULL; //we have to set root back to NULL to avoid annoying error
+		return;
+	}
+	cur = root;//this will us resolve the error by not leaving any empty pointers not null
+	vertex* tmp = new vertex();
+	int savingInt = -1;//at -1 something went wrong
+	while (cur != NULL)//a psuedo search function
+	{
+		//the only thing this loop will check
+		if(cur->data < target->data)//go to the right side
+		{
+			if(cur->right->data == target->data)
+			{
+				tmp = cur;//save the parent of the child about to be deleted
+				savingInt = 1;//for right side
+				cur = NULL;//end the loop
+			}else
+			{
+				cur = cur->right;//continue the search
+			}
+		}
+		else if (cur->data > target->data) //go to the left side
+		{
+			if (cur->left->data == target->data)
+			{
+				tmp = cur;//save the parent of the child about to be deleted
+				savingInt = 2;//for left side
+				cur = NULL;//end the loop
+			}
+			else
+			{
+				cur = cur->left;//continue the search
+			}
+		}
+		
+	}
+	//THE ACTUAL REMOVE FUNCTION
 	//first check for children
-	if(target->hasLeft() && target->hasRight())//if this comes out to true then we need to do the difficult solution of finding the smallest leftmost node and bringing it up
+	if (target->hasLeft() && target->hasRight())//if this comes out to true then we need to do the difficult solution of finding the smallest leftmost node and bringing it up
 	{
 		//okay first we gotta find the left most node on the right side so that the tree still works
-		vertex* temp = minValueNode(target->right); 
+		vertex* temp = minValueNode(target->right);
 		//now that we have our node we just replace and delete just like if we had 1 child node
-		target->data = temp->data; //replace
-		delete temp; //delete that leftmost node now that we have deleted it
+		T tmpData = temp->data;
+		remove(temp); //delete that leftmost node now that we have moved its data
+		target->data = tmpData; //replace
+		
 	}
-	else if(target->hasLeft())//has one child or none since last check failed
+	else if (target->hasLeft())//has one child on the left
 	{
-		vertex* temp = target->left;//save the left node to a pointer for easy transfer
-		target = temp; //overwrite the target effectively deleting it, since this is saving as a node this should also say the left/right if the child had any
-		delete target->left; //remove the old child since this one now has that data
+		vertex* leftSidePnt = target->left;//save the left node to a pointer for easy transfer
+		if (tmp->data < target->data)
+		{
+			tmp->right = leftSidePnt;
+		}
+		else
+		{
+			tmp->left = leftSidePnt;
+		}
+		delete target; //remove the old child since this one now has that data
+	}
+	/*
+	insert 5
+	insert 8
+	insert 6
 
-	}
-	else if(target->hasRight())//has one child
+						5
+									8
+								6		9
+	*/
+	else if (target->hasRight())//has one child on the right
 	{
-		vertex* temp = target->right;//save the right node to a pointer for easy transfer
-		target = temp; //overwrite the target effectively deleting it
-		delete target->right; //remove the old child since this one now has that data
+		vertex* rightSidePnt = target->right;//save the right node to a pointer for easy transfer
+		if(tmp->data<target->data)
+		{
+			tmp->right = rightSidePnt;
+		}else
+		{
+			tmp->left = rightSidePnt;
+		}
+		delete target; //remove the old child since this one now has that data
 	}
 	else//no child easy peasy
 	{
 		delete target;
+		switch(savingInt)//right = 1, left = 2
+		{
+		case 1:
+			tmp->right = NULL;
+			break;
+		case 2:
+			tmp->left = NULL;
+			break;
+		}
 	}
 }
 template <typename T>
 bool tBinaryTree<T>::search(const T& value, vertex*& found)
 {
-	//first our basic if else
-	if(value == data) //this will be our determining check
+	if(root == NULL)//if this activates I'll just return false, not much else I can do there
 	{
-		found = *this;//change the found to the current vertex since this will become a recursive function
-		return true; //return true that we found it
+		return false;
 	}
-	else if(value<data)
+	if (cur == NULL)//setting the current
 	{
-		if(hasLeft())//if it fails this check it will simply exit this if statement and return at bottom since this is an if else
+		cur = root;
+	}
+	while(cur!=NULL) //if I make it to the end this will become NULL cause it can hit a point where there is nothing else in tree
+	{
+		if(cur->data==value) //once it has found the value this if will activate
 		{
-			return left->search(value, found);
+			found = cur;//seting found to the current vertex
+			cur = NULL;//remember to do this
+			return true;
+		}
+		else if(cur->data<value) //goes to right
+		{
+			if(cur->hasRight())
+			{
+				cur = cur->right; //setting this up for next loop iteration
+			}
+			else//to get here it has to have hit the bottom of the tree
+			{
+				cur = NULL; //ending the loop so it can return false
+			}
+		}
+		else//cur data would have to be more than the value to reach this point
+		{
+			//goes to left
+			if (cur->hasLeft())
+			{
+				cur = cur->left; //setting this up for next loop iteration
+			}
+			else//to get here it has to have hit the bottom of the tree
+			{
+				cur = NULL; //ending the loop so it can return false
+			}
 		}
 	}
-	else if(value>data)
-	{
-		if(hasRight())//refer to left check for logic behind this
-		{
-			return right->search(value, found);
-		}
-	}
-	//this is the bottom of the method if it never finds the value it will simply return false here
 	return false;
 }
 template <typename T>
@@ -186,7 +295,7 @@ template <typename T>
  template <typename T>
  void tBinaryTree<T>::destroyTree(vertex* point)
  {
-	 if(point!=nullptr)
+	 if(point!=NULL)
 	 {
 		 if (point->hasLeft()) //first check if a left exists don't want to call a method for a point that doesn't exist
 		 {
@@ -200,17 +309,17 @@ template <typename T>
 	 }
  }
  template <typename T>
- tBinaryTree<T>::vertex* tBinaryTree<T>::minValueNode(vertex* startNode)
+ typename tBinaryTree<T>::vertex* tBinaryTree<T>::minValueNode(vertex* startNode)
  {
 	 //I only need to get the data here since this is a leftmost node which means it will have no children
-	 vertex* cur = node; //getting a good easy node to work from
+	 vertex* current = startNode; //getting a good easy node to work from
 
 	 //looping down to find the leftmost
-	 while(cur && cur->left !=nullptr)
+	 while(current && current->left !=NULL)
 	 {
-		 cur = cur->left;
+		 current = current->left;
 	 }
-	 return cur; //return the data
+	 return current; //return the data
  }
 
 
